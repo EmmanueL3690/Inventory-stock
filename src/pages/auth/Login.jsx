@@ -1,169 +1,208 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Check, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { loginUser } from "../../routes/services/authService";
 import { useAuth } from "../../Contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ FIXED: move here
+  const { login } = useAuth();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("idle"); // idle | loading | success
   const [error, setError] = useState("");
+  const [isExiting, setIsExiting] = useState(false);
 
-  // ✅ Redirect if already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/");
-    }
+    if (token) navigate("/");
   }, [navigate]);
 
-  // HANDLE INPUT
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.email || !form.password) {
+      setError("Please fill all fields");
+      return;
+    }
 
-  if (!form.email || !form.password) {
-    setError("Please fill all fields");
-    return;
-  }
+    try {
+      setStatus("loading");
+      const res = await loginUser(form);
+      
+      // ✅ Success Animation Trigger
+      setStatus("success");
+      
+      // ✅ Wait for checkmark animation, then fade out
+      setTimeout(() => {
+        setIsExiting(true);
+        setTimeout(() => {
+          login(res.data);
+          navigate("/");
+        }, 600); // Duration of page fade
+      }, 1000); // Time user sees the "Success" state
 
-  try {
-    setLoading(true);
-
-    const res = await loginUser(form);
-
-    // ✅ Get full backend response
-    const data = res.data;
-
-    // ✅ Let AuthContext handle everything
-    login(data);
-
-    // ✅ Redirect
-    navigate("/");
-
-  } catch (err) {
-    console.error(err);
-
-    setError(
-      err.response?.data?.message || "Invalid email or password"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid email or password");
+      setStatus("idle");
+    }
+  };
 
   return (
-    <div className="bg-white w-[500px] rounded-2xl shadow-xl p-8">
+    <AnimatePresence>
+      {!isExiting && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+          transition={{ duration: 0.5 }}
+          className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-4"
+        >
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="bg-white w-full max-w-[450px] rounded-3xl shadow-2xl shadow-slate-200/50 p-8 md:p-10"
+          >
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+                Stocklytics
+              </h2>
+              <p className="text-slate-500 text-sm mt-1">Welcome back, please login.</p>
+            </div>
 
-      <h2 className="text-xl font-semibold text-center mb-1">
-        Welcome to Stocklytics
-      </h2>
-      <p className="text-sm text-gray-500 text-center mb-6">
-        Login to your account
-      </p>
+            {error && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                className="mb-6 text-xs font-bold text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-2"
+              >
+                <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                {error}
+              </motion.div>
+            )}
 
-      {error && (
-        <div className="mb-4 text-sm text-red-500 bg-red-50 p-2 rounded">
-          {error}
-        </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1">
+                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Email</label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors" size={18} />
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none"
+                    placeholder="admin@stocklytics.com"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-black text-slate-400 uppercase ml-1">Password</label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors" size={18} />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              
+
+              {/* MORPHING BUTTON */}
+              <button
+                disabled={status !== "idle"}
+                className="relative w-full h-[56px] flex items-center justify-center overflow-hidden rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-green-200/50 disabled:cursor-default"
+              >
+                <motion.div
+                  initial={false}
+                  animate={{
+                    backgroundColor: status === "success" ? "#10b981" : status === "loading" ? "#059669" : "#16a34a",
+                    width: "100%",
+                  }}
+                  className="absolute inset-0"
+                />
+                
+                <AnimatePresence mode="wait">
+                  {status === "idle" && (
+                    <motion.span
+                      key="idle"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="relative z-10 text-white flex items-center gap-2"
+                    >
+                      Login to Dashboard
+                    </motion.span>
+                  )}
+                  {status === "loading" && (
+                    <motion.div
+                      key="loading"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.5 }}
+                      className="relative z-10"
+                    >
+                      <Loader2 className="animate-spin text-white" size={24} />
+                    </motion.div>
+                  )}
+                  {status === "success" && (
+                    <motion.div
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.5, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      className="relative z-10 flex items-center gap-2 text-white"
+                    >
+                      <Check size={24} strokeWidth={3} />
+                      Success
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+            </form>
+            {/* Social Login Section */}
+              <div className="mt-3">
+                <div className="relative mb-4 text-center">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100" /></div>
+                  <span className="relative px-4 bg-white text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Or Secure Login With</span>
+                </div>
+
+                <button className="w-full h-[58px] border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all font-bold text-slate-700">
+                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" className="w-6 h-6" />
+                  Google Account
+                </button>
+              </div>
+
+            <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col items-center gap-4">
+               <button className="text-slate-400 text-xs hover:text-slate-600 font-semibold transition-colors">
+                 Forgot password?
+               </button>
+               <p className="text-slate-500 text-sm">
+                 Don't have an account? <span className="text-green-600 font-bold cursor-pointer hover:underline" onClick={() => navigate("/signup")}>Sign up</span>
+               </p>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-
-        {/* EMAIL */}
-        <div className="relative">
-          <Mail className="absolute left-3 top-3.5 text-gray-400" size={18} />
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="Email Address"
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* PASSWORD */}
-        <div className="relative">
-          <Lock className="absolute left-3 top-3.5 text-gray-400" size={18} />
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            placeholder="Password"
-            className="w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
-
-          <span
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-3.5 cursor-pointer text-gray-400"
-          >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </span>
-        </div>
-
-        {/* OPTIONS */}
-        <div className="flex justify-between items-center text-sm">
-          <label className="flex items-center gap-2 text-gray-600">
-            <input type="checkbox" />
-            Remember me
-          </label>
-
-          <span
-            onClick={() => navigate("/forgot-password")}
-            className="text-green-600 cursor-pointer hover:underline"
-          >
-            Forgot password?
-          </span>
-        </div>
-
-        {/* BUTTON */}
-        <button
-          disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
-
-      <div className="flex items-center gap-3 my-5">
-        <div className="flex-1 h-px bg-gray-200"></div>
-        <span className="text-gray-400 text-sm">OR</span>
-        <div className="flex-1 h-px bg-gray-200"></div>
-      </div>
-
-      <button className="w-full border py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50">
-        <img
-          src="https://www.svgrepo.com/show/475656/google-color.svg"
-          alt="google"
-          className="w-5"
-        />
-        Login with Google
-      </button>
-
-      <p className="text-center text-sm text-gray-500 mt-6">
-        Don't have an account?{" "}
-        <span
-          onClick={() => navigate("/signup")}
-          className="text-green-600 cursor-pointer hover:underline"
-        >
-          Sign up
-        </span>
-      </p>
-    </div>
+    </AnimatePresence>
   );
 };
 
