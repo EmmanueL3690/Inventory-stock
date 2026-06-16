@@ -1,0 +1,65 @@
+export const salesStats = [
+  {
+    title: "Today's Sales",
+    value: "₦120,000",
+    growth: "+12.5%",
+    color: "blue",
+  },
+  {
+    title: "This Week's Sales",
+    value: "₦850,000",
+    growth: "+8.3%",
+    color: "green",
+  },
+  {
+    title: "This Month's Sales",
+    value: "₦3,450,000",
+    growth: "+15.7%",
+    color: "purple",
+  },
+  {
+    title: "Total Orders",
+    value: "156",
+    growth: "+10.2%",
+    color: "orange",
+  },
+];
+
+export const salesData = [
+  {
+    invoice: "INV-10045",
+    date: "May 11, 2025",
+    time: "10:30 AM",
+    customer: "Walk-in Customer",
+    type: "Retail",
+    items: "3 items",
+    amount: "₦45,000",
+    payment: "Cash",
+    status: "Completed",
+    salesperson: "John Doe",
+  },
+  {
+    invoice: "INV-10044",
+    date: "May 10, 2025",
+    time: "03:15 PM",
+    customer: "City Hospital",
+    type: "Wholesale",
+    items: "12 items",
+    amount: "₦78,500",
+    payment: "Bank Transfer",
+    status: "Completed",
+    salesperson: "Jane Smith",
+  },
+  {
+    invoice: "INV-10043",
+    date: "May 10, 2025",
+    time: "11:45 AM",
+    customer: "HealthPlus Pharmacy",
+    type: "Wholesale",
+    items: "6 items",
+    amount: "₦22,000",
+    payment: "Credit",
+    status: "Completed",
+    salesperson: "John Doe",
+  },
+];

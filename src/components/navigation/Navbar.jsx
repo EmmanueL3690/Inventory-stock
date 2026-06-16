@@ -103,7 +103,7 @@ const Navbar = ({ toggleSidebar }) => {
             <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-lg py-2 border border-slate-100">
               
               <button
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/settings")}
                 className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
               >
                 Profile

@@ -14,6 +14,7 @@ const Login = () => {
   const [status, setStatus] = useState("idle"); // idle | loading | success
   const [error, setError] = useState("");
   const [isExiting, setIsExiting] = useState(false);
+  const [showGooglePopup, setShowGooglePopup] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -185,14 +186,26 @@ const Login = () => {
                   <span className="relative px-4 bg-white text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Or Secure Login With</span>
                 </div>
 
-                <button className="w-full h-[58px] border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all font-bold text-slate-700">
-                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" className="w-6 h-6" />
-                  Google Account
-                </button>
+                
+                <button
+                type="button"
+                onClick={() => setShowGooglePopup(true)}
+                className="w-full h-[58px] border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all font-bold text-slate-700"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google"
+                  className="w-6 h-6"
+                />
+                Google Account
+              </button>
               </div>
 
             <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col items-center gap-4">
-               <button className="text-slate-400 text-xs hover:text-slate-600 font-semibold transition-colors">
+               <button onClick={
+                () => navigate('/forgot-password')
+               } 
+               className="text-slate-400 text-xs hover:text-slate-600 font-semibold transition-colors">
                  Forgot password?
                </button>
                <p className="text-slate-500 text-sm">
@@ -200,9 +213,60 @@ const Login = () => {
                </p>
             </div>
           </motion.div>
+          <AnimatePresence>
+  {showGooglePopup && (
+    <>
+      {/* Overlay */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setShowGooglePopup(false)}
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+      />
+
+      {/* Popup */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      >
+        <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center">
+          <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google"
+              className="w-8 h-8"
+            />
+          </div>
+
+          <h3 className="text-xl font-bold text-slate-800 mb-2">
+            Google Login Coming Soon
+          </h3>
+
+          <p className="text-sm text-slate-500 leading-relaxed mb-6">
+            Google authentication has not been implemented yet.
+            Please use your email and password to log in for now.
+          </p>
+
+          <button
+            onClick={() => setShowGooglePopup(false)}
+            className="w-full py-3 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-semibold transition-colors"
+          >
+            Okay
+          </button>
+        </div>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
+
+    
   );
 };
 
