@@ -10,7 +10,7 @@ import {
   Boxes 
 } from "lucide-react";
 import authBg from "../assets/bg.png";
-import logo from "../assets/LOGO.png";
+import logo from "../assets/logo.png";
 
 const AuthLayout = () => {
   // Feature card items configuration

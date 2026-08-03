@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Check, ShieldCheck } from "lucide-react";
 
 import authBg from "../../assets/bg.png";
-import logo from "../../assets/LOGO.png";
+import logo from "../../assets/logo.png";
 
 import { useAuth } from "../../Contexts/AuthContext";
 
