@@ -50,11 +50,14 @@ import Alerts from "../pages/alerts/Alerts";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import AuthRoute from "./utils/AuthRoute";
 import OnboardingGuard from "../guards/OnboardingGuard";
+import RootRedirect from "./utils/RootRedirect";
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
+         {/* Root Route */}
+           <Route path="/" element={<RootRedirect />} />
         {/* =========================================
             PUBLIC LANDING PAGE
         ========================================= */}
@@ -86,7 +89,7 @@ const AppRoutes = () => {
             <Route element={<DashboardLayout />}>
               
               {/* Authenticated Dashboard */}
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
 
               {/* Inventory Tree */}
               <Route path="/inventory" element={<Inventory />} />
