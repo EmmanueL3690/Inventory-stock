@@ -1,28 +1,74 @@
-const StatCard = ({
+import React from "react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+
+export const StatCard = ({
   title,
   value,
-  subtitle
+  subtitle,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  change,
+  isPositive,
 }) => {
-
   return (
+    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all duration-300">
 
-    <div className="bg-white rounded-xl border p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
 
-      <p className="text-sm text-slate-500">
-        {title}
-      </p>
+        <div>
+          <p className="text-sm text-slate-500">
+            {title}
+          </p>
 
-      <h3 className="text-2xl font-bold mt-2">
-        {value}
-      </h3>
+          <h3 className="text-2xl font-bold text-slate-900 mt-2">
+            {value}
+          </h3>
+        </div>
 
-      <p className="text-sm text-slate-400 mt-1">
-        {subtitle}
-      </p>
+        {Icon && (
+          <div
+            className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconBg}`}
+          >
+            <Icon
+              size={22}
+              className={iconColor}
+            />
+          </div>
+        )}
+
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between mt-5">
+
+        <p className="text-sm text-slate-400">
+          {subtitle}
+        </p>
+
+        {change && (
+          <div
+            className={`flex items-center gap-1 text-sm font-semibold ${
+              isPositive
+                ? "text-emerald-600"
+                : "text-red-500"
+            }`}
+          >
+            {isPositive ? (
+              <TrendingUp size={16} />
+            ) : (
+              <TrendingDown size={16} />
+            )}
+
+            <span>{change}</span>
+          </div>
+        )}
+
+      </div>
 
     </div>
+  );
+};
 
-  )
-}
-
-export default StatCard
+export default StatCard;

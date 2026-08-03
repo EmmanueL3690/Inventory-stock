@@ -1,39 +1,150 @@
 // src/features/dashboard/components/RecentSalesTable.jsx
-import React from 'react';
 
-export const RecentSalesTable = ({ sales }) => (
-  <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full justify-between">
-    <div>
-      <div className="p-5 flex items-center justify-between border-b border-slate-50">
-        <h2 className="font-bold text-slate-900 text-base">Recent Sales</h2>
-        <button className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
+import React from "react";
+
+export const RecentSalesTable = ({ sales = [] }) => {
+
+  const formatDate = (date) => {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    return `₦${Number(amount || 0).toLocaleString()}`;
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+
+      {/* Header */}
+
+      <div className="p-5 flex items-center justify-between border-b border-slate-100">
+
+        <h2 className="font-bold text-slate-900 text-base">
+          Recent Sales
+        </h2>
+
+        <button className="text-xs font-semibold text-blue-600 hover:underline">
+          View All
+        </button>
+
       </div>
+
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm border-collapse">
+
+        <table className="w-full">
+
           <thead>
-            <tr className="bg-slate-50/70 border-b border-slate-100 text-slate-400 font-medium text-xs">
-              <th className="p-4">Date</th>
-              <th className="p-4">Invoice #</th>
-              <th className="p-4">Customer</th>
-              <th className="p-4">Amount</th>
-              <th className="p-4">Status</th>
+
+            <tr className="bg-slate-50 text-xs uppercase text-slate-500">
+
+              <th className="p-4 text-left">
+                Date
+              </th>
+
+              <th className="p-4 text-left">
+                Invoice
+              </th>
+
+              <th className="p-4 text-left">
+                Customer
+              </th>
+
+              <th className="p-4 text-left">
+                Payment
+              </th>
+
+              <th className="p-4 text-left">
+                Amount
+              </th>
+
+              <th className="p-4 text-left">
+                Status
+              </th>
+
             </tr>
+
           </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {sales.map((sale, i) => (
-              <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                <td className="p-4 text-xs text-slate-500">{sale.date}</td>
-                <td className="p-4 font-medium text-slate-900 text-xs">{sale.invoice}</td>
-                <td className="p-4 text-xs">{sale.customer}</td>
-                <td className="p-4 font-semibold text-slate-900 text-xs">{sale.amount}</td>
-                <td className="p-4">
-                  <span className="px-2 py-1 text-[10px] font-bold bg-emerald-50 text-emerald-600 rounded-md">{sale.status}</span>
+
+          <tbody>
+
+            {sales.length === 0 ? (
+
+              <tr>
+
+                <td
+                  colSpan="6"
+                  className="text-center py-8 text-slate-400"
+                >
+                  No recent sales found.
                 </td>
+
               </tr>
-            ))}
+
+            ) : (
+
+              sales.map((sale) => (
+
+                <tr
+                  key={sale._id}
+                  className="border-t border-slate-100 hover:bg-slate-50"
+                >
+
+                  <td className="p-4 text-sm text-slate-600">
+                    {formatDate(sale.createdAt)}
+                  </td>
+
+                  <td className="p-4 font-medium text-sm">
+                    {sale.invoiceNumber}
+                  </td>
+
+                  <td className="p-4 text-sm">
+                    {sale.customerName}
+                  </td>
+
+                  <td className="p-4 capitalize text-sm">
+                    {sale.paymentMethod}
+                  </td>
+
+                  <td className="p-4 font-semibold text-sm">
+                    {formatCurrency(sale.grandTotal)}
+                  </td>
+
+                  <td className="p-4">
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        sale.paymentStatus === "paid"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : sale.paymentStatus === "pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {sale.paymentStatus}
+                    </span>
+
+                  </td>
+
+                </tr>
+
+              ))
+
+            )}
+
           </tbody>
+
         </table>
+
       </div>
+
     </div>
-  </div>
-);
+  );
+};
+
+export default RecentSalesTable;

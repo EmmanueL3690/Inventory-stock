@@ -1,100 +1,105 @@
-import SectionCard from "../../../../components/ui/SectionCard"
-import { Field } from "../../../../components/ui/Field"
-import TextInput from "../../../../components/ui/TextInput"
-import Select from "../../../../components/ui/Select"
+import SectionCard from "../../../../components/ui/SectionCard";
+import { Field } from "../../../../components/ui/Field";
+import TextInput from "../../../../components/ui/TextInput";
+import Select from "../../../../components/ui/Select";
 
-import { Package } from "lucide-react"
+import { Package } from "lucide-react";
 
 const InventorySection = ({
   formData,
-  handleChange
+  handleChange,
+  units = [],
+  isLoading,
 }) => {
+  return (
+    <SectionCard
+      title="Inventory"
+      icon={<Package size={18} />}
+    >
+      <div className="grid md:grid-cols-3 gap-4">
 
-return (
+        {/* Initial Stock */}
 
-<SectionCard
-title="Inventory"
-icon={<Package size={18}/>}
->
+        <Field
+          label="Initial Stock"
+          required
+        >
+          <TextInput
+            name="stock"
+            value={formData.stock}
+            onChange={handleChange}
+            type="number"
+          />
+        </Field>
 
-<div className="grid md:grid-cols-3 gap-4">
+        {/* Unit */}
 
-<Field
-label="Initial Stock"
-required
->
+        <Field label="Unit" required>
+          <Select
+            name="unit"
+            value={formData.unit}
+            onChange={handleChange}
+            disabled={isLoading}
+          >
+            <option value="">
+              {isLoading
+                ? "Loading Units..."
+                : "Select Unit"}
+            </option>
 
-<TextInput
-name="stock"
-value={formData.stock}
-onChange={handleChange}
-type="number"
-/>
+            {units.map((unit) => (
+              <option
+                key={unit._id}
+                value={unit._id}
+              >
+                {unit.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
 
-</Field>
+        {/* Reorder Level */}
 
-<Field label="Unit">
+        <Field label="Reorder Level">
+          <TextInput
+            name="reorderLevel"
+            value={formData.reorderLevel}
+            onChange={handleChange}
+            type="number"
+          />
+        </Field>
 
-<Select
-name="unit"
-value={formData.unit}
-onChange={handleChange}
->
+        {/* Warehouse */}
 
-<option>Select unit</option>
-<option>Bottle</option>
-<option>Pack</option>
-<option>Piece</option>
+        <Field
+          label="Location / Warehouse"
+          className="md:col-span-2"
+        >
+          <Select disabled>
+            <option>
+              Select warehouse
+            </option>
+          </Select>
+        </Field>
 
-</Select>
+        {/* Track Stock */}
 
-</Field>
+        <div className="flex items-end">
+          <label className="flex gap-2 items-center">
 
-<Field label="Reorder Level">
+            <input
+              type="checkbox"
+              defaultChecked
+            />
 
-<TextInput
-name="reorderLevel"
-value={formData.reorderLevel}
-onChange={handleChange}
-type="number"
-/>
+            <span>Track stock</span>
 
-</Field>
+          </label>
+        </div>
 
-<Field
-label="Location / Warehouse"
-className="md:col-span-2"
->
+      </div>
+    </SectionCard>
+  );
+};
 
-<Select>
-
-<option>Select warehouse</option>
-
-</Select>
-
-</Field>
-
-<div className="flex items-end">
-
-<label className="flex gap-2">
-
-<input
-type="checkbox"
-defaultChecked
-/>
-
-Track stock
-
-</label>
-
-</div>
-
-</div>
-
-</SectionCard>
-
-)
-
-}
-
-export default InventorySection
+export default InventorySection;

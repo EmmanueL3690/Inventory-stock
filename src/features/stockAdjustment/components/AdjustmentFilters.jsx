@@ -4,6 +4,7 @@ import { Search, MapPin, AlertCircle, Eye, RotateCcw } from 'lucide-react';
 const AdjustmentFilters = ({ engine }) => {
   const handleReset = () => {
     engine.setSearchQuery('');
+    engine.handleSelectProduct(null);
     engine.setLocationFilter('All Locations');
     engine.setReasonFilter('All Reasons');
     engine.setStatusFilter('All Status');
@@ -11,7 +12,7 @@ const AdjustmentFilters = ({ engine }) => {
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between border-b border-slate-100 pb-4">
-      {/* Primary Query Filter Input Field */}
+      {/* Search Bar / Product Search */}
       <div className="relative flex-1 max-w-md w-full">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} strokeWidth={2.5} />
         <input
@@ -25,6 +26,28 @@ const AdjustmentFilters = ({ engine }) => {
 
       {/* Select Filter Controls Suite */}
       <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start sm:justify-end">
+        {/* Product Selector Dropdown */}
+        <select
+          value={engine.selectedProductId || ''}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            if (!selectedId) {
+              engine.handleSelectProduct(null);
+            } else {
+              const prod = engine.products.find((p) => (p.id || p._id) === selectedId);
+              engine.handleSelectProduct(prod || null);
+            }
+          }}
+          className="h-10 px-3 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-xl hover:border-slate-300 transition outline-none cursor-pointer max-w-[200px]"
+        >
+          <option value="">All Products</option>
+          {engine.products.map((p) => (
+            <option key={p.id || p._id} value={p.id || p._id}>
+              {p.name} ({p.sku || 'No SKU'})
+            </option>
+          ))}
+        </select>
+
         {/* Warehouse Dropdown */}
         <div className="relative">
           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={13} />
@@ -48,10 +71,8 @@ const AdjustmentFilters = ({ engine }) => {
             className="h-10 pl-8 pr-8 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-xl hover:border-slate-300 transition outline-none cursor-pointer appearance-none min-w-[120px]"
           >
             <option>All Reasons</option>
-            <option>Manual Correction</option>
-            <option>Damaged</option>
-            <option>Expired</option>
-            <option>Missing</option>
+            <option value="DAMAGE">DAMAGE</option>
+            <option value="LOST">LOST</option>
           </select>
         </div>
 

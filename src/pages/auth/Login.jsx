@@ -28,6 +28,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!form.email || !form.password) {
       setError("Please fill all fields");
       return;
@@ -35,22 +36,59 @@ const Login = () => {
 
     try {
       setStatus("loading");
-      const res = await loginUser(form);
+
+      // Submit Credentials
+      const response = await loginUser(form);
       
-      // ✅ Success Animation Trigger
+      // Support both prospective API response layouts
+      const authPayload = response?.data?.data ?? response?.data;
+
+      // Deep payload structural compliance checks
+      if (
+        !authPayload ||
+        !authPayload.accessToken ||
+        !authPayload.user ||
+        !authPayload.business
+      ) {
+        throw new Error("Authentication succeeded but returned an incomplete session.");
+      }
+
+      // Safe normalization of critical properties without structural mutation
+      const business = {
+        ...authPayload.business,
+        onboardingCompleted: authPayload.business?.onboardingCompleted ?? false,
+      };
+
+      const normalizedPayload = {
+        ...authPayload,
+        business,
+      };
+
+      // Entrust state persistence processing cleanly to Context Architecture 
+      login(normalizedPayload);
+
       setStatus("success");
-      
-      // ✅ Wait for checkmark animation, then fade out
+
+      // Align animation timelines cleanly before making the workspace redirect
       setTimeout(() => {
         setIsExiting(true);
+
         setTimeout(() => {
-          login(res.data);
-          navigate("/");
-        }, 600); // Duration of page fade
-      }, 1000); // Time user sees the "Success" state
+          // Route exclusively driven by data object boolean state normalization
+          if (normalizedPayload.business.onboardingCompleted === true) {
+            navigate("/", { replace: true });
+          } else {
+            navigate("/onboarding", { replace: true });
+          }
+        }, 600);
+      }, 1000);
 
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid email or password");
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Unable to login."
+      );
       setStatus("idle");
     }
   };
@@ -95,7 +133,7 @@ const Login = () => {
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors" size={18} />
                   <input
-                    type="email"
+                    type="text"
                     name="email"
                     value={form.email}
                     onChange={handleChange}
@@ -126,7 +164,6 @@ const Login = () => {
                   </button>
                 </div>
               </div>
-              
 
               {/* MORPHING BUTTON */}
               <button
@@ -179,15 +216,15 @@ const Login = () => {
                 </AnimatePresence>
               </button>
             </form>
-            {/* Social Login Section */}
-              <div className="mt-3">
-                <div className="relative mb-4 text-center">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100" /></div>
-                  <span className="relative px-4 bg-white text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Or Secure Login With</span>
-                </div>
 
-                
-                <button
+            {/* Social Login Section */}
+            <div className="mt-3">
+              <div className="relative mb-4 text-center">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100" /></div>
+                <span className="relative px-4 bg-white text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Or Secure Login With</span>
+              </div>
+
+              <button
                 type="button"
                 onClick={() => setShowGooglePopup(true)}
                 className="w-full h-[58px] border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all font-bold text-slate-700"
@@ -199,74 +236,72 @@ const Login = () => {
                 />
                 Google Account
               </button>
-              </div>
+            </div>
 
             <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col items-center gap-4">
-               <button onClick={
-                () => navigate('/forgot-password')
-               } 
-               className="text-slate-400 text-xs hover:text-slate-600 font-semibold transition-colors">
-                 Forgot password?
-               </button>
-               <p className="text-slate-500 text-sm">
-                 Don't have an account? <span className="text-green-600 font-bold cursor-pointer hover:underline" onClick={() => navigate("/signup")}>Sign up</span>
-               </p>
+              <button onClick={() => navigate('/forgot-password')} 
+                className="text-slate-400 text-xs hover:text-slate-600 font-semibold transition-colors">
+                Forgot password?
+              </button>
+              <p className="text-slate-500 text-sm">
+                Don't have an account? <span className="text-green-600 font-bold cursor-pointer hover:underline" onClick={() => navigate("/signup")}>Sign up</span>
+              </p>
             </div>
           </motion.div>
+
           <AnimatePresence>
-  {showGooglePopup && (
-    <>
-      {/* Overlay */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => setShowGooglePopup(false)}
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
-      />
+            {showGooglePopup && (
+              <>
+                {/* Overlay */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowGooglePopup(false)}
+                  className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+                />
 
-      {/* Popup */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      >
-        <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
-            <img
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google"
-              className="w-8 h-8"
-            />
-          </div>
+                {/* Popup */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                >
+                  <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center">
+                    <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
+                      <img
+                        src="https://www.svgrepo.com/show/475656/google-color.svg"
+                        alt="Google"
+                        className="w-8 h-8"
+                      />
+                    </div>
 
-          <h3 className="text-xl font-bold text-slate-800 mb-2">
-            Google Login Coming Soon
-          </h3>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">
+                      Google Login Coming Soon
+                    </h3>
 
-          <p className="text-sm text-slate-500 leading-relaxed mb-6">
-            Google authentication has not been implemented yet.
-            Please use your email and password to log in for now.
-          </p>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-6">
+                      Google authentication has not been implemented yet.
+                      Please use your email and password to log in for now.
+                    </p>
 
-          <button
-            onClick={() => setShowGooglePopup(false)}
-            className="w-full py-3 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-semibold transition-colors"
-          >
-            Okay
-          </button>
-        </div>
-      </motion.div>
-    </>
-  )}
-</AnimatePresence>
+                    <button
+                      type="button"
+                      onClick={() => setShowGooglePopup(false)}
+                      className="w-full py-3 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-semibold transition-colors"
+                    >
+                      Okay
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
-
-    
   );
 };
 

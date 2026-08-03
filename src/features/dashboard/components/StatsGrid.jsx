@@ -1,25 +1,76 @@
 // src/features/dashboard/components/StatsGrid.jsx
-import React from 'react';
-import { TrendingUp, Package, AlertTriangle, Star } from 'lucide-react';
-import { StatCard } from './StatCard';
+
+import React from "react";
+import {
+  TrendingUp,
+  Package,
+  AlertTriangle,
+  Star,
+} from "lucide-react";
+
+import { StatCard } from "./StatCard";
 
 export const StatsGrid = ({ stats }) => {
+  const financials = stats?.financials || {};
+  const inventory = stats?.inventoryStatus || {};
+  const topProduct =
+    stats?.insights?.topSellingProducts?.[0];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-      <StatCard 
-        title="Today's Sales" value={stats.todaySales.value} change={stats.todaySales.change}
-        subtitle="vs yesterday" isPositive={stats.todaySales.isPositive} icon={TrendingUp} iconBg="bg-emerald-50" iconColor="text-emerald-600"
+
+      {/* Today's Revenue */}
+
+      <StatCard
+        title="Today's Revenue"
+        value={`₦${financials.todayRevenue ?? 0}`}
+        change={`${financials.todayTransactionsCount ?? 0} Transactions`}
+        subtitle="Today's Sales"
+        isPositive={true}
+        icon={TrendingUp}
+        iconBg="bg-emerald-50"
+        iconColor="text-emerald-600"
       />
-      <StatCard 
-        title="Total Inventory Value" value={stats.totalInventory.value} change={stats.totalInventory.change}
-        subtitle="vs last month" isPositive={stats.totalInventory.isPositive} icon={Package} iconBg="bg-blue-50" iconColor="text-blue-600"
+
+      {/* Inventory Value */}
+
+      <StatCard
+        title="Inventory Value"
+        value={`₦${inventory.totalStockAssetValue ?? 0}`}
+        change={`${inventory.totalStockQuantity ?? 0} Items`}
+        subtitle="Current Stock"
+        isPositive={true}
+        icon={Package}
+        iconBg="bg-blue-50"
+        iconColor="text-blue-600"
       />
-      <StatCard 
-        title="Low Stock Alert" value={`${stats.lowStock.count} Items`} subtitle={stats.lowStock.message} icon={AlertTriangle} iconBg="bg-orange-50" iconColor="text-orange-500"
+
+      {/* Low Stock */}
+
+      <StatCard
+        title="Low Stock Alert"
+        value={`${inventory.lowStockAlertsCount ?? 0} Items`}
+        subtitle="Need Restocking"
+        icon={AlertTriangle}
+        iconBg="bg-orange-50"
+        iconColor="text-orange-500"
       />
-      <StatCard 
-        title="Top Selling Product" value={stats.topProduct.name} subtitle={stats.topProduct.units} icon={Star} iconBg="bg-purple-50" iconColor="text-purple-600"
+
+      {/* Top Product */}
+
+      <StatCard
+        title="Top Selling Product"
+        value={topProduct?.name || "No Sales Yet"}
+        subtitle={
+          topProduct
+            ? `${topProduct.totalSold} Units Sold`
+            : "Waiting for sales"
+        }
+        icon={Star}
+        iconBg="bg-purple-50"
+        iconColor="text-purple-600"
       />
+
     </div>
   );
 };

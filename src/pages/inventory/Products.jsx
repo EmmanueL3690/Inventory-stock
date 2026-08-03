@@ -4,7 +4,6 @@ import ProductSearch from "../../features/products/components/ProductSearch"
 import ProductTabs from "../../features/products/components/ProductTabs"
 import ProductFilters from "../../features/products/components/ProductFilters"
 import ProductTable from "../../features/products/components/ProductTable"
-import ProductDetailsDrawer from "../../features/products/components/ProductDetailsDrawer"
 
 import Breadcrumb from "../../components/ui/Breadcrumb"
 import PageHeader from "../../components/ui/PageHeader"
@@ -12,13 +11,11 @@ import PageHeader from "../../components/ui/PageHeader"
 import { useProducts } from "../../features/products/hooks/useProducts"
 
 const Products = () => {
-
   const navigate = useNavigate()
 
   /* ---------------- PRODUCT ENGINE ---------------- */
 
   const {
-
     /* DATA */
     filteredProducts,
 
@@ -43,18 +40,9 @@ const Products = () => {
     priceFilter,
     setPriceFilter,
 
-    /* SELECTED PRODUCT */
-    selectedProduct,
-
-    /* DETAILS DRAWER */
-    isDrawerOpen,
-    setIsDrawerOpen,
-
     /* ACTIONS */
     handleDeleteProduct,
     handleArchiveProduct,
-    handleOpenDetails,
-
   } = useProducts()
 
 
@@ -83,21 +71,7 @@ const Products = () => {
   ]
 
 
-  /* ---------------- DEBUG ---------------- */
-
-  console.log(
-    "Selected Product:",
-    selectedProduct
-  )
-
-  console.log(
-    "Drawer State:",
-    isDrawerOpen
-  )
-
-
   return (
-
     <div className="space-y-6 p-4 md:p-6 animate-in fade-in duration-300">
 
       {/* ---------------- BREADCRUMB ---------------- */}
@@ -153,25 +127,18 @@ const Products = () => {
 
       {/* ---------------- PRODUCT TABLE ---------------- */}
 
+      {console.log("Products:", filteredProducts)}
+
       <ProductTable
         columns={columns}
         data={filteredProducts}
         onDelete={handleDeleteProduct}
         onArchive={handleArchiveProduct}
-        onView={handleOpenDetails}
+        onView={(product) =>
+          navigate(`/inventory/products/${product._id}`)
+        }
       />
-
-
-      {/* ---------------- PRODUCT DETAILS ---------------- */}
-
-      <ProductDetailsDrawer
-        open={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        product={selectedProduct}
-      />
-
     </div>
-
   )
 }
 

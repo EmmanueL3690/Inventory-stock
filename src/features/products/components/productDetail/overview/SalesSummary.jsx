@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ArrowUpRight } from 'lucide-react';
+import { ChevronDown, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Minimalist sales value inspector module
@@ -14,7 +14,16 @@ const CustomSalesTooltip = ({ active, payload }) => {
   return null;
 };
 
-const SalesSummary = ({ data, units, revenue }) => {
+const SalesSummary = ({ product }) => {
+  const salesSummary = product?.salesSummary;
+  const hasSalesData = !!salesSummary;
+
+  // Safeguard calculations and fallbacks
+  const unitsSold = salesSummary?.unitsSold ?? null;
+  const revenue = salesSummary?.revenue ?? null;
+  const chartData = salesSummary?.monthlySales || [];
+  const hasChartData = chartData.length > 0;
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
       {/* Header Container Actions */}
@@ -26,58 +35,81 @@ const SalesSummary = ({ data, units, revenue }) => {
         </button>
       </div>
 
-      {/* Numerical Data Splitting Metric Cards Blocks */}
-      <div className="grid grid-cols-2 gap-4 bg-slate-50/60 p-3.5 rounded-xl border border-slate-100">
-        <div className="space-y-0.5">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block">Total Units Sold</span>
-          <h3 className="text-base font-extrabold text-slate-900">{units.toLocaleString()}</h3>
-          <span className="inline-flex items-center text-[10px] font-bold text-emerald-600">
-            <ArrowUpRight size={12} className="mr-0.5" /> 18.6% <span className="text-slate-400 font-medium ml-1">vs last mo.</span>
-          </span>
+      {!hasSalesData ? (
+        /* Professional Empty State Wrapper matching card boundaries */
+        <div className="flex flex-col items-center justify-center py-20 px-4 border border-dashed border-slate-200 rounded-xl bg-slate-50/30 text-center">
+          <BarChart3 className="h-9 w-9 text-slate-300 mb-2.5" />
+          <h5 className="text-xs font-bold text-slate-700">No sales analytics available.</h5>
+          <p className="text-[11px] text-slate-400 max-w-xs mt-0.5 leading-relaxed">
+            Sales insights will appear after sales transactions are recorded.
+          </p>
         </div>
-        <div className="space-y-0.5 border-l border-slate-200 pl-4">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block">Total Revenue</span>
-          <h3 className="text-base font-extrabold text-slate-900">₦{revenue.toLocaleString()}</h3>
-          <span className="inline-flex items-center text-[10px] font-bold text-emerald-600">
-            <ArrowUpRight size={12} className="mr-0.5" /> 22.4% <span className="text-slate-400 font-medium ml-1">vs last mo.</span>
-          </span>
-        </div>
-      </div>
+      ) : (
+        <>
+          {/* Numerical Data Splitting Metric Cards Blocks */}
+          <div className="grid grid-cols-2 gap-4 bg-slate-50/60 p-3.5 rounded-xl border border-slate-100">
+            <div className="space-y-0.5">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block">Total Units Sold</span>
+              <h3 className="text-base font-extrabold text-slate-900">
+                {unitsSold !== null ? unitsSold.toLocaleString() : "--"}
+              </h3>
+              <span className="inline-flex items-center text-[10px] font-bold text-slate-400">
+                <span className="w-1 h-1 rounded-full bg-slate-300 mr-1.5" /> Live Data
+              </span>
+            </div>
+            <div className="space-y-0.5 border-l border-slate-200 pl-4">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block">Total Revenue</span>
+              <h3 className="text-base font-extrabold text-slate-900">
+                {revenue !== null ? `₦${revenue.toLocaleString()}` : "--"}
+              </h3>
+              <span className="inline-flex items-center text-[10px] font-bold text-slate-400">
+                <span className="w-1 h-1 rounded-full bg-slate-300 mr-1.5" /> Live Data
+              </span>
+            </div>
+          </div>
 
-      {/* Bar Chart Section */}
-      <div className="space-y-2">
-        <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Top Selling Periods</h5>
-        
-        {/* Recharts Bar Canvas Containment Deck */}
-        <div className="w-full h-32 pt-2">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }} barSize={32}>
-              {/* Timeline Axis Markers */}
-              <XAxis 
-                dataKey="period" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }}
-                dy={8}
-              />
-              
-              {/* Value Axis remains hidden for visual neatness */}
-              <YAxis hide />
-              
-              {/* Interactive Inspector Overlay Hook */}
-              <Tooltip content={<CustomSalesTooltip />} cursor={{ fill: '#f8fafc', opacity: 0.6 }} />
-              
-              {/* Unified Rounded Column Element Node */}
-              <Bar 
-                dataKey="value" 
-                fill="#2563eb" 
-                radius={[6, 6, 0, 0]}
-                className="hover:fill-blue-700 transition-colors duration-150"
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+          {/* Bar Chart Section */}
+          <div className="space-y-2">
+            <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Top Selling Periods</h5>
+            
+            {/* Recharts Bar Canvas Containment Deck */}
+            <div className="w-full h-32 pt-2">
+              {!hasChartData ? (
+                <div className="w-full h-full flex items-center justify-center border border-dashed border-slate-100 bg-slate-50/20 rounded-lg">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">No chart data available</span>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }} barSize={32}>
+                    {/* Timeline Axis Markers */}
+                    <XAxis 
+                      dataKey="period" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }}
+                      dy={8}
+                    />
+                    
+                    {/* Value Axis remains hidden for visual neatness */}
+                    <YAxis hide />
+                    
+                    {/* Interactive Inspector Overlay Hook */}
+                    <Tooltip content={<CustomSalesTooltip />} cursor={{ fill: '#f8fafc', opacity: 0.6 }} />
+                    
+                    {/* Unified Rounded Column Element Node */}
+                    <Bar 
+                      dataKey="value" 
+                      fill="#2563eb" 
+                      radius={[6, 6, 0, 0]}
+                      className="hover:fill-blue-700 transition-colors duration-150"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

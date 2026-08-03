@@ -1,140 +1,138 @@
-import SectionCard from "../../../../components/ui/SectionCard"
-import { Field } from "../../../../components/ui/Field"
-import TextInput from "../../../../components/ui/TextInput"
-import Select from "../../../../components/ui/Select"
+import SectionCard from "../../../../components/ui/SectionCard";
+import { Field } from "../../../../components/ui/Field";
+import TextInput from "../../../../components/ui/TextInput";
+import Select from "../../../../components/ui/Select";
 
 import {
-Info,
-Camera,
-Plus
-} from "lucide-react"
+  Info,
+  Camera,
+  Plus,
+} from "lucide-react";
 
-const ProductInfoSection=({
-formData,
-handleChange
-})=>{
+const ProductInfoSection = ({
+  formData,
+  handleChange,
+  categories = [],
+  isLoading,
+}) => {
+  return (
+    <SectionCard
+      title="Product Information"
+      icon={<Info size={18} />}
+    >
+      <div className="grid md:grid-cols-2 gap-4">
 
-return(
+        {/* Product Name */}
 
-<SectionCard
-title="Product Information"
-icon={<Info size={18}/>}
->
+        <Field
+          label="Product Name"
+          required
+        >
+          <TextInput
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter product name"
+          />
+        </Field>
 
-<div className="grid md:grid-cols-2 gap-4">
+        {/* SKU */}
 
-<Field
-label="Product Name"
-required
->
+        <Field
+          label="SKU / Barcode"
+          required
+        >
+          <div className="flex gap-2">
+            <TextInput
+              name="sku"
+              value={formData.sku}
+              onChange={handleChange}
+              placeholder="Enter barcode"
+            />
 
-<TextInput
-name="name"
-value={formData.name}
-onChange={handleChange}
-placeholder="Enter product name"
-/>
+            <button
+              type="button"
+              className="w-11 h-11 border rounded-lg flex justify-center items-center"
+            >
+              <Camera size={18} />
+            </button>
+          </div>
+        </Field>
 
-</Field>
+        {/* Category */}
 
-<Field
-label="SKU / Barcode"
-required
->
+        <Field
+          label="Category"
+          required
+        >
+          <Select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            disabled={isLoading}
+          >
+            <option value="">
+              {isLoading
+                ? "Loading Categories..."
+                : "Select Category"}
+            </option>
 
-<div className="flex gap-2">
+            {categories.map((category) => (
+              <option
+                key={category._id}
+                value={category._id}
+              >
+                {category.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
 
-<TextInput
-name="sku"
-value={formData.sku}
-onChange={handleChange}
-placeholder="Enter barcode"
-/>
+        {/* Sub Category */}
 
-<button
-className="w-11 h-11 border rounded-lg flex justify-center items-center"
->
+        <Field label="Sub Category">
+          <Select disabled>
+            <option>
+              Select sub category
+            </option>
+          </Select>
+        </Field>
 
-<Camera size={18}/>
+        {/* Brand */}
 
-</button>
+        <Field label="Brand">
+          <TextInput
+            name="brand"
+            value={formData.brand}
+            onChange={handleChange}
+            placeholder="Enter brand"
+          />
+        </Field>
 
-</div>
+        {/* Supplier */}
 
-</Field>
+        <Field label="Supplier">
+          <div className="flex gap-2">
 
-<Field
-label="Category"
-required
->
+            <Select disabled>
+              <option>
+                Select supplier
+              </option>
+            </Select>
 
-<Select
-name="category"
-value={formData.category}
-onChange={handleChange}
->
+            <button
+              type="button"
+              className="w-11 h-11 border rounded-lg flex justify-center items-center"
+            >
+              <Plus size={18} />
+            </button>
 
-<option>Select category</option>
+          </div>
+        </Field>
 
-<option>Dairy</option>
+      </div>
+    </SectionCard>
+  );
+};
 
-<option>Bakery</option>
-
-<option>Groceries</option>
-
-</Select>
-
-</Field>
-
-<Field label="Sub Category">
-
-<Select>
-
-<option>Select sub category</option>
-
-</Select>
-
-</Field>
-
-<Field label="Brand">
-
-<TextInput
-name="brand"
-value={formData.brand}
-onChange={handleChange}
-placeholder="Enter brand"
-/>
-
-</Field>
-
-<Field label="Supplier">
-
-<div className="flex gap-2">
-
-<Select>
-
-<option>Select supplier</option>
-
-</Select>
-
-<button
-className="w-11 h-11 border rounded-lg flex justify-center items-center"
->
-
-<Plus size={18}/>
-
-</button>
-
-</div>
-
-</Field>
-
-</div>
-
-</SectionCard>
-
-)
-
-}
-
-export default ProductInfoSection
+export default ProductInfoSection;

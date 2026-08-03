@@ -1,52 +1,87 @@
 import React from 'react';
-import { Layers, CircleDollarSign, TrendingUp, Wallet, Coins } from 'lucide-react';
+import { Layers, Activity, Lock, Wallet, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 
-const ProductStats = ({ stats }) => {
+const ProductStats = ({ product }) => {
+  // Safe helper to format currency
+  const formatCurrency = (val) => {
+    if (val === undefined || val === null || isNaN(Number(val))) return "₦0.00";
+    return `₦${Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Safe helper to format numbers
+  const formatNumber = (val) => {
+    if (val === undefined || val === null || isNaN(Number(val))) return "0";
+    return Number(val).toLocaleString();
+  };
+
+  // Extract normalized values from useProducts hook output
+  const availableStock = Number(product?.availableStock ?? 0);
+  const currentQuantity = Number(product?.currentQuantity ?? 0);
+  const reservedStock = Number(product?.reservedStock ?? 0);
+  const reorderLevel = Number(product?.reorderLevel ?? 0);
+  const inventoryValue = Number(product?.inventoryValue ?? (availableStock * (product?.sellingPrice || 0)));
+  const unit = product?.unit || "PCS";
+
+  // Determine Stock Status for Available Stock Card Indicator
+  const isOutOfStock = availableStock === 0;
+  const isLowStock = !isOutOfStock && availableStock <= reorderLevel;
+
+  let stockStatusLabel = "In Stock";
+  let isPositive = true;
+
+  if (isOutOfStock) {
+    stockStatusLabel = "Out of Stock";
+    isPositive = false;
+  } else if (isLowStock) {
+    stockStatusLabel = "Low Stock Alert";
+    isPositive = false;
+  }
+
   const cards = [
     {
       label: "Current Stock",
-      value: `${stats.currentStock.toLocaleString()} ${stats.unitType}`,
-      subtext: stats.stockStatus,
+      value: `${formatNumber(currentQuantity)} ${unit}`,
+      subtext: `Total Physical Units`,
       isPositive: true,
-      icon: Layers,
+      icon: Activity,
       color: "text-blue-600",
       bg: "bg-blue-50"
     },
     {
+      label: "Available Stock",
+      value: `${formatNumber(availableStock)} ${unit}`,
+      subtext: stockStatusLabel,
+      isPositive: isPositive,
+      icon: isOutOfStock ? XCircle : isLowStock ? AlertTriangle : CheckCircle2,
+      color: isOutOfStock ? "text-rose-600" : isLowStock ? "text-amber-600" : "text-emerald-600",
+      bg: isOutOfStock ? "bg-rose-50" : isLowStock ? "bg-amber-50" : "bg-emerald-50"
+    },
+    {
+      label: "Reserved Stock",
+      value: `${formatNumber(reservedStock)} ${unit}`,
+      subtext: "Allocated / Held",
+      isPositive: null,
+      icon: Lock,
+      color: "text-sky-600",
+      bg: "bg-sky-50"
+    },
+    {
       label: "Inventory Value",
-      value: `₦${stats.inventoryValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
-      subtext: "Total value",
+      value: formatCurrency(inventoryValue),
+      subtext: `@ ₦${Number(product?.sellingPrice || 0).toLocaleString()} / ${unit}`,
       isPositive: null,
       icon: Wallet,
       color: "text-purple-600",
       bg: "bg-purple-50"
     },
     {
-      label: "Units Sold",
-      value: stats.unitsSoldThisMonth.toLocaleString(),
-      subtext: "This month",
+      label: "Reorder Level",
+      value: `${formatNumber(reorderLevel)} ${unit}`,
+      subtext: "Restock Threshold",
       isPositive: null,
-      icon: TrendingUp,
+      icon: Layers,
       color: "text-amber-600",
       bg: "bg-amber-50"
-    },
-    {
-      label: "Revenue Generated",
-      value: `₦${stats.revenueThisMonth.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
-      subtext: "This month",
-      isPositive: null,
-      icon: CircleDollarSign,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50"
-    },
-    {
-      label: "Profit Generated",
-      value: `₦${stats.profitThisMonth.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
-      subtext: "This month",
-      isPositive: null,
-      icon: Coins,
-      color: "text-sky-600",
-      bg: "bg-sky-50"
     }
   ];
 

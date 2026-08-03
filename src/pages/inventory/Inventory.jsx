@@ -1,61 +1,67 @@
-import { useNavigate } from "react-router-dom"
-import InventoryHeader from "../../features/inventoryDashboard/components/InventoryHeader"
-import InventoryStats from "../../features/inventoryDashboard/components/InventoryStats"
-import InventoryFilters from "../../features/inventoryDashboard/components/InventoryFilters"
-import InventoryTable from "../../features/inventoryDashboard/components/InventoryTable"
-import ProductDetailsDrawer from "../../features/products/components/ProductDetailsDrawer"
+import React from "react";
 
-import { useInventory } from "../../features/inventoryDashboard/components/hooks/useInventory"
+import InventoryHeader from "../../features/inventory/components/InventoryHeader";
+import InventoryStats from "../../features/inventory/components/InventoryStats";
+import StockMovementTable from "../../features/inventory/components/StockMovementTable";
+
+import { useInventory } from "../../features/inventory/hooks/useInventory";
 
 const Inventory = () => {
-
-  const navigate = useNavigate()
-
   const {
-    filteredProducts,
+    // Global Dashboard States
+    loading,
+    error,
 
-    totalItems,
-    inStock,
-    lowStock,
-    outOfStock,
-    totalValue,
+    // Dashboard Statistics
+    totalItems = 0,
+    inStock = 0,
+    lowStock = 0,
+    outOfStock = 0,
+    totalValue = 0,
 
-    search,
-    setSearch,
+    // Stock Movements Data
+    movements = [],
+    loadingMovements,
+    errorMovements,
+  } = useInventory();
 
-    selectedCategory,
-    setSelectedCategory,
+  // Global initial dashboard load state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-slate-600 font-medium">
+            Loading dashboard analytics...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-    selectedStatus,
-    setSelectedStatus,
-
-    stockFilter,
-    setStockFilter,
-
-    priceFilter,
-    setPriceFilter,
-
-    selectedProduct,
-    isDrawerOpen,
-    setIsDrawerOpen,
-
-    handleDeleteProduct,
-    handleArchiveProduct,
-    handleOpenEdit,
-    handleOpenDetails,
-
-  } = useInventory()
+  // Global dashboard error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-lg text-center">
+          <h2 className="text-lg font-bold text-red-600">
+            Failed to load inventory dashboard
+          </h2>
+          <p className="mt-2 text-red-500">
+            {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
+    <div className="space-y-6 p-4 md:p-6 bg-slate-50 min-h-screen">
+      
+      {/* Dashboard Header */}
+      <InventoryHeader />
 
-    <div className="space-y-6 p-4 md:p-6">
-
-      <InventoryHeader
-        onAddProduct={() =>
-          navigate("/inventory/products/add")
-        }
-      />
-
+      {/* Overview Analytics Statistics */}
       <InventoryStats
         totalItems={totalItems}
         inStock={inStock}
@@ -64,36 +70,28 @@ const Inventory = () => {
         totalValue={totalValue}
       />
 
-      <InventoryFilters
-        search={search}
-        setSearch={setSearch}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        selectedStatus={selectedStatus}
-        setSelectedStatus={setSelectedStatus}
-        stockFilter={stockFilter}
-        setStockFilter={setStockFilter}
-        priceFilter={priceFilter}
-        setPriceFilter={setPriceFilter}
-      />
-
-      <InventoryTable
-        data={filteredProducts}
-        onEdit={handleOpenEdit}
-        onDelete={handleDeleteProduct}
-        onArchive={handleArchiveProduct}
-        onView={handleOpenDetails}
-      />
-
-      <ProductDetailsDrawer
-        open={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        product={selectedProduct}
-      />
+      {/* Stock Movements Ledger Section */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 bg-white">
+          <h2 className="text-lg font-bold text-slate-900">
+            Stock Movements Log
+          </h2>
+          <p className="text-xs md:text-sm text-slate-500 mt-0.5">
+            Real-time ledger tracking all incoming shipments, internal transfers, and outgoing adjustments.
+          </p>
+        </div>
+        
+        <div className="p-5 bg-white">
+          <StockMovementTable 
+            movements={movements}
+            loading={loadingMovements}
+            error={errorMovements}
+          />
+        </div>
+      </div>
 
     </div>
+  );
+};
 
-  )
-}
-
-export default Inventory
+export default Inventory;
